@@ -3,10 +3,10 @@ async function api(url, options={}) {
     const cookies = document.cookie.split(";");
 
     for (const cookie of cookies) {
-        const [key, ...value] = cookie.trim().split("=");
+        const parts = cookie.trim().split("=");
 
-        if (key === name) {
-            return decodeURIComponent(value.join("="));
+        if (parts[0] === name) {
+            return decodeURIComponent(parts.slice(1).join("="));
         }
     }
 
@@ -18,19 +18,20 @@ async function api(url, options = {}) {
 
     const opts = {
         ...options,
+        credentials: "same-origin",
         headers: {
             ...(options.headers || {})
         }
     };
 
-    // Add CSRF token for Django POST/PUT/PATCH/DELETE requests
+    // Get Django CSRF token
     const csrfToken = getCookie("csrftoken");
 
     if (csrfToken) {
         opts.headers["X-CSRFToken"] = csrfToken;
     }
 
-    // Automatically send JSON for normal JavaScript objects
+    // Convert JavaScript objects to JSON
     if (
         opts.body &&
         !(opts.body instanceof FormData) &&
@@ -44,14 +45,19 @@ async function api(url, options = {}) {
 
     const contentType = response.headers.get("content-type") || "";
 
-    const data = contentType.includes("application/json")
-        ? await response.json()
-        : await response.blob();
+    let data;
+
+    if (contentType.includes("application/json")) {
+        data = await response.json();
+    } else {
+        data = await response.text();
+    }
 
     if (!response.ok) {
         throw new Error(
-            data.detail ||
-            "Request failed"
+            typeof data === "object" && data.detail
+                ? data.detail
+                : data || "Request failed"
         );
     }
 
@@ -82,17 +88,25 @@ async function register() {
 }
 
 async function login() {
-  try {
-    const data = await api("/api/accounts/login/", {
-      method:"POST",
-      body:{
-        username:document.getElementById("login-user").value,
-        password:document.getElementById("login-pass").value
-      }
-    });
-    if(data.mfa_required) document.getElementById("mfa-box").hidden=false;
-    document.getElementById("login-out").textContent=JSON.stringify(data,null,2);
-  } catch(e){ document.getElementById("login-out").textContent=e.message; }
+    try {
+        const data = await api("/api/accounts/login/", {
+            method: "POST",
+            body: {
+                username: document.getElementById("login-user").value,
+                password: document.getElementById("login-pass").value
+            }
+        });
+
+        if (data.mfa_required) {
+            document.getElementById("mfa-box").hidden = false;
+        }
+
+        document.getElementById("login-out").textContent =
+            JSON.stringify(data, null, 2);
+
+    } catch (e) {
+        document.getElementById("login-out").textContent = e.message;
+    }
 }
 
 async function verifyMfa() {
