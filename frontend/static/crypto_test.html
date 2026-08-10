@@ -1,0 +1,22 @@
+<!doctype html>
+<html><body>
+<h2>Web Crypto API AES-GCM Test</h2>
+<input id="f" type="file">
+<button onclick="run()">Run</button>
+<pre id="out"></pre>
+<script src="/static/crypto.js"></script>
+<script>
+async function run(){
+ const file=document.getElementById("f").files[0];
+ if(!file)return;
+ const t0=performance.now();
+ const x=await CryptoClient.encryptFile(file);
+ const t1=performance.now();
+ document.getElementById("out").textContent=
+   "Original bytes: "+file.size+
+   "\\nCiphertext bytes: "+x.ciphertext.size+
+   "\\nSHA-256: "+x.plaintextHash+
+   "\\nAES-GCM encryption time: "+(t1-t0).toFixed(3)+" ms";
+}
+</script>
+</body></html>

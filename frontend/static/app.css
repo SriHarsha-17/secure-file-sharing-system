@@ -1,0 +1,9 @@
+body{font-family:Arial,sans-serif;background:#f3f6fa;margin:0;color:#172033}
+header{background:#172033;color:white;padding:20px}
+header h1{margin:0 0 12px}
+button{padding:9px 14px;margin:4px;border:0;border-radius:6px;cursor:pointer}
+input{display:block;width:min(500px,90%);padding:10px;margin:8px 0;border:1px solid #ccd3df;border-radius:6px}
+main{max-width:1000px;margin:25px auto;padding:0 15px}
+.card{background:white;padding:20px;margin-bottom:18px;border-radius:10px;box-shadow:0 2px 12px #00000010}
+.file-item,.space-item{border:1px solid #dde3eb;padding:12px;margin:8px 0;border-radius:8px}
+pre{white-space:pre-wrap}
